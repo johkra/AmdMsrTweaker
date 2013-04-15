@@ -168,7 +168,7 @@ static void SwitchTo(int logicalCPUIndex)
 	SetThreadAffinityMask(hThread, (DWORD_PTR)1 << logicalCPUIndex);
 }
 
-void Worker::ApplyChanges()
+boolean Worker::ApplyChanges(boolean allowHighestNonBoostChange)
 {
 	const Info& info = *_info;
 
@@ -195,6 +195,13 @@ void Worker::ApplyChanges()
 				psi.NBVID = nbpsi.VID;
 		}
 	}
+
+	// Check for multiplicator change to highest non-boost P-state. This can
+	// cause issues with the graphical system.
+	int highestNonBoostIndex = info.NumBoostStates;
+	PStateInfo highestNonBoost = info.ReadPState(highestNonBoostIndex);
+	if (_pStates[highestNonBoostIndex].Multi != highestNonBoost.Multi && !allowHighestNonBoostChange)
+		return false;
 
 	if (_turbo >= 0 && info.IsBoostSupported)
 		info.SetBoostSource(_turbo == 1);
@@ -250,4 +257,6 @@ void Worker::ApplyChanges()
 
 	SetThreadPriority(hThread, THREAD_PRIORITY_NORMAL);
 	SetPriorityClass(hProcess, NORMAL_PRIORITY_CLASS);
+
+	return true;
 }

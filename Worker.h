@@ -24,7 +24,11 @@ public:
 
 	bool ParseParams(int argc, const char* argv[]);
 
-	void ApplyChanges();
+	boolean ApplyChanges()
+	{
+		ApplyChanges(false);
+	}
+	boolean ApplyChanges(boolean allowHighestNonBoostChange);
 
 
 private:

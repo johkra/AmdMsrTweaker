@@ -54,7 +54,20 @@ int main(int argc, const char* argv[])
 				return 3;
 			}
 
-			worker.ApplyChanges();
+			if (!worker.ApplyChanges())
+			{
+				cout << "WARNING: Trying to change highest non-boost P-state. This can cause issues with the graphical system of Windows." << endl;
+				cout << "Do you want to proceed? [yN]" << endl;
+				int answer = _getch();
+				if (answer == 'y' || answer == 'Y')
+				{
+					worker.ApplyChanges(true);
+				}
+				else
+				{
+					return 4;
+				}
+			}
 		}
 		else
 		{
