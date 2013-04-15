@@ -216,7 +216,9 @@ bool Worker::ApplyChanges(bool allowHighestNonBoostChange)
 	*/
 	int highestNonBoostIndex = info.NumBoostStates;
 	PStateInfo highestNonBoost = info.ReadPState(highestNonBoostIndex);
-	if (_pStates[highestNonBoostIndex].Multi != highestNonBoost.Multi && !allowHighestNonBoostChange)
+	if (_pStates[highestNonBoostIndex].Multi != -1
+		&& _pStates[highestNonBoostIndex].Multi != highestNonBoost.Multi
+		&& !allowHighestNonBoostChange)
 		return false;
 
 	if (_turbo >= 0 && info.IsBoostSupported)
