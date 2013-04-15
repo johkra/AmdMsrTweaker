@@ -14,6 +14,7 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::string;
 
 
 void PrintInfo(const Info& info);
@@ -54,12 +55,23 @@ int main(int argc, const char* argv[])
 				return 3;
 			}
 
-			if (!worker.ApplyChanges())
+			bool noWarning = false;
+			for (int i = 1; i < argc; i++)
+			{
+				if (strcmp(argv[i], "--no-warn") == 0)
+				{
+					noWarning = true;
+					break;
+				}
+			}
+
+			if (!worker.ApplyChanges(noWarning))
 			{
 				cout << "WARNING: Trying to change clock for highest non-boost";
 				cout << " P-state. This can cause issues with the graphical ";
 				cout << "system of Windows and render the system unusable ";
-				cout << "until a reboot." << endl;
+				cout << "until a reboot. (Use --no-warn to disable this ";
+				cout << "warning)" << endl;
 				cout << "Do you want to proceed? [yN]" << endl;
 				int answer = _getch();
 				if (answer == 'y' || answer == 'Y')

@@ -60,6 +60,11 @@ bool Worker::ParseParams(int argc, const char* argv[])
 	{
 		const string param(argv[i]);
 
+		if (param == "--no-warn")
+		{
+			continue;
+		}
+
 		string key, value;
 		SplitPair(key, value, param, '=');
 
@@ -166,10 +171,6 @@ static void SwitchTo(int logicalCPUIndex)
 {
 	const HANDLE hThread = GetCurrentThread();
 	SetThreadAffinityMask(hThread, (DWORD_PTR)1 << logicalCPUIndex);
-}
-
-bool Worker::ApplyChanges() {
-	return Worker::ApplyChanges(false);
 }
 
 bool Worker::ApplyChanges(bool allowHighestNonBoostChange)
