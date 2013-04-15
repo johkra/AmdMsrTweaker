@@ -60,6 +60,11 @@ bool Worker::ParseParams(int argc, const char* argv[])
 	{
 		const string param(argv[i]);
 
+		if (param == "--no-warn")
+		{
+			continue;
+		}
+
 		string key, value;
 		SplitPair(key, value, param, '=');
 
@@ -168,7 +173,7 @@ static void SwitchTo(int logicalCPUIndex)
 	SetThreadAffinityMask(hThread, (DWORD_PTR)1 << logicalCPUIndex);
 }
 
-void Worker::ApplyChanges()
+bool Worker::ApplyChanges(bool allowHighestNonBoostChange)
 {
 	const Info& info = *_info;
 
@@ -195,6 +200,26 @@ void Worker::ApplyChanges()
 				psi.NBVID = nbpsi.VID;
 		}
 	}
+
+	/* Taken from TCI K² tool documention:
+	IMPORTANT: CPU PState0 should never be adjusted! On all AMD K15h based CPUs
+	the Time Stamp Counter (TSC) is tied to CPU PState0. This means the TSC 
+	will always tick at the rate of CPU PState0. Modifying the CPU PState0 
+	frequency (changing FID/DID) will make the TSC to reset. On Windows Vista and 
+	Windows 7 OS the Aero DWM service uses the CPU TSC. For some reason the 
+	Aero DWM crashes if the TSC is resetted. Restarting Aero DWM will not make 
+	any difference, the crash is permanent. The only way to make it work properly
+	again is to reset the CPU PState0 to the same frequency the system was booted
+	with.
+	It does not have any effect to the performance or stability; however the 
+	display may look corrupted.
+	*/
+	int highestNonBoostIndex = info.NumBoostStates;
+	PStateInfo highestNonBoost = info.ReadPState(highestNonBoostIndex);
+	if (_pStates[highestNonBoostIndex].Multi != -1
+		&& _pStates[highestNonBoostIndex].Multi != highestNonBoost.Multi
+		&& !allowHighestNonBoostChange)
+		return false;
 
 	if (_turbo >= 0 && info.IsBoostSupported)
 		info.SetBoostSource(_turbo == 1);
@@ -250,4 +275,6 @@ void Worker::ApplyChanges()
 
 	SetThreadPriority(hThread, THREAD_PRIORITY_NORMAL);
 	SetPriorityClass(hProcess, NORMAL_PRIORITY_CLASS);
+
+	return true;
 }
