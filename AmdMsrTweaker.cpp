@@ -56,7 +56,10 @@ int main(int argc, const char* argv[])
 
 			if (!worker.ApplyChanges())
 			{
-				cout << "WARNING: Trying to change highest non-boost P-state. This can cause issues with the graphical system of Windows." << endl;
+				cout << "WARNING: Trying to change clock for highest non-boost";
+				cout << " P-state. This can cause issues with the graphical ";
+				cout << "system of Windows and render the system unusable ";
+				cout << "until a reboot." << endl;
 				cout << "Do you want to proceed? [yN]" << endl;
 				int answer = _getch();
 				if (answer == 'y' || answer == 'Y')

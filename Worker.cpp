@@ -200,8 +200,19 @@ bool Worker::ApplyChanges(bool allowHighestNonBoostChange)
 		}
 	}
 
-	// Check for multiplicator change to highest non-boost P-state. This can
-	// cause issues with the graphical system.
+	/* Taken from TCI K² tool documention:
+	IMPORTANT: CPU PState0 should never be adjusted! On all AMD K15h based CPUs
+	the Time Stamp Counter (TSC) is tied to CPU PState0. This means the TSC 
+	will always tick at the rate of CPU PState0. Modifying the CPU PState0 
+	frequency (changing FID/DID) will make the TSC to reset. On Windows Vista and 
+	Windows 7 OS the Aero DWM service uses the CPU TSC. For some reason the 
+	Aero DWM crashes if the TSC is resetted. Restarting Aero DWM will not make 
+	any difference, the crash is permanent. The only way to make it work properly
+	again is to reset the CPU PState0 to the same frequency the system was booted
+	with.
+	It does not have any effect to the performance or stability; however the 
+	display may look corrupted.
+	*/
 	int highestNonBoostIndex = info.NumBoostStates;
 	PStateInfo highestNonBoost = info.ReadPState(highestNonBoostIndex);
 	if (_pStates[highestNonBoostIndex].Multi != highestNonBoost.Multi && !allowHighestNonBoostChange)
