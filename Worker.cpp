@@ -168,7 +168,11 @@ static void SwitchTo(int logicalCPUIndex)
 	SetThreadAffinityMask(hThread, (DWORD_PTR)1 << logicalCPUIndex);
 }
 
-boolean Worker::ApplyChanges(boolean allowHighestNonBoostChange)
+bool Worker::ApplyChanges() {
+	return Worker::ApplyChanges(false);
+}
+
+bool Worker::ApplyChanges(bool allowHighestNonBoostChange)
 {
 	const Info& info = *_info;
 
